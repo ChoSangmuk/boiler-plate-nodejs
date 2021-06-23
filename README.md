@@ -16,7 +16,7 @@ docker run -it ubuntu
   apt-get install git-all
   mkdir workspace
 docker commit -m "node, npm installed" heuristic_panini node_basic:0.1
-docker run -p 3000:3000 -p 5000:5000 -v /Users/chosangmuk/Documents:/workspace -it node_basic:0.1
+docker run -p 5000:5000 -v /Users/chosangmuk/Documents:/workspace -it node_basic:0.1
 ```
    
 ## 실행 방법 (로컬)
@@ -25,8 +25,8 @@ docker run -p 3000:3000 -p 5000:5000 -v /Users/chosangmuk/Documents:/workspace -
 ```js
 // config/dev.js
 module.exports = {
-  mongoURI : '',
-  tokenKey : ''
+  mongoURI: '',
+  tokenKey: ''
 }
 ```
 3. Node.js Back-End 실행
@@ -37,6 +37,8 @@ npm install
 
 # Node.js 실행
 npm run start
+# or
+npm start
 # or
 npm run dev
 ```
@@ -82,7 +84,7 @@ app.listen(port, () => {
 "scripts": {
   "start": "node index.js",
   "test": "echo \"Error: no test specified\" && exit 1"
-},		
+},
 ```
 - node 실행 및 모듈 다운 받기
 ```sh
@@ -107,15 +109,15 @@ npm install mongoose --save
 // index.js
 const mongoose = require('mongoose')
 // mongoDb Connect
-mongoose.connect('~~~~~~~', 
+mongoose.connect('~~~~~~~~~',
   {
-    useNewUrlParser : true, 
-    useUnifiedTopology : true, 
-    useCreateIndex : true, 
-    useFindAndModify : false
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    useCreateIndex: true,
+    useFindAndModify: false
   }
-).then(() => console.log("MongoDB Connected ... "))
-.catch(err => console.log(err))
+).then(() => console.log("Boiler Plate Node.js MongoDB Connected ... "))
+  .catch(err => console.log(err))
 ```
 - 강의 댓글 참고
 ```
@@ -139,18 +141,18 @@ touch User.js
 ```js
 // User.js
 const mongoose = require('mongoose')
-const userSchema = mongoose.Schema( {
-    name : { type : String, maxlength : 50 }, 
-    email : { type : String, trim : true,unique : 1 }, 
-    password : { type : String, minlength : 5 }, 
-    lastname : { type : String, maxlength : 50 }, 
-    role : { type : Number, default : 0 }, 
-    image : String, 
-    token : { type : String }, 
-    tokenExp : { type : Number } 
-} )
-const User =  mongoose.model('User', userSchema)
-module.exports = {User}
+const userSchema = mongoose.Schema({
+  name: { type: String, maxlength: 50 },
+  email: { type: String, trim: true, unique: 1 },
+  password: { type: String, minlength: 5 },
+  lastname: { type: String, maxlength: 50 },
+  role: { type: Number, default: 0 },
+  image: String,
+  token: { type: String },
+  tokenExp: { type: Number }
+})
+const User = mongoose.model('User', userSchema)
+module.exports = { User }
 ```
 
 ## 5장 GIT 설치
@@ -212,14 +214,15 @@ npm install body-parser --save
 ```js
 // index.js
 // 사용자 등록(/api/user/register)
+// save(enteredUser) -> savedUser
 app.post('/api/user/register', (req, res) => {
-  console.log("\napp.post('/api/user/register', (req, res) => {})")
-  const user = new User(req.body) // 사용자가 입력한 정보 user를 저장
+  console.log("index.js app.post('/api/user/register', (req, res) => {})")
+  const enteredUser = new User(req.body)// 사용자가 입력한 정보 user를 저장
   // 회원가입 정보를 클라이언트에서 가져와 DB에 넣어준다.
-  user.save((err, userInfo) => {
-    console.log("user.save((err, userInfo) => {})")
-    if(err) return res.json({registerSuccess : false, err})
-    return res.status(200).json({registerSuccess : true})
+  console.log("index.js enteredUser.save((err, savedUser) => {})")
+  enteredUser.save((err, savedUser) => {
+    if (err) return res.json({ registerSuccess: false, err })
+    return res.status(200).json({ registerSuccess: true })
   })
 })
 ```
@@ -234,8 +237,10 @@ npm install nodemon --save-dev
 ```json
 // package.json
 "scripts": {
-  "dev": "nodemon index.js"
-}
+  "start": "node index.js",
+  "dev": "nodemon index.js",
+  "test": "echo \"Error: no test specified\" && exit 1"
+},
 ```
 
 ## 9장 비밀 설정 정보 관리
@@ -243,23 +248,24 @@ npm install nodemon --save-dev
 - 해당 내용 분리(config/dev.js) 후에 .gitignore에 등록
 ```js
 // config/key.js
-if(process.env.NODE_ENV === 'production' ) {
+if (process.env.NODE_ENV === 'production') {
   module.exports = require('./prod')
 } else {
   module.exports = require('./dev')
-} 
+}
 
 // config/prod.js
 module.exports = {
-    mongoURI : process.env.MONGO_URI
+  mongoURI: process.env.MONGO_URI,
+  tokenKey: 'token key'
 }
 
 // index.js
 // mongoDb Connect
-mongoose.connect(config.mongoURI, 
-  {...}
-).then(() => console.log("MongoDB Connected ... "))
-.catch(err => console.log(err))
+mongoose.connect(config.mongoURI,
+  { ... }
+).then(() => console.log("Boiler Plate Node.js MongoDB Connected ... "))
+  .catch(err => console.log(err))
 ```
 
 ## 10장 Bcrypt로 비밀번호 암호화 하기
@@ -274,28 +280,26 @@ npm install bcrypt --save
 ```js
 // User.js
 const bcrypt = require('bcrypt')
-const saltRounds = 10 //  salt 길이
+const saltRounds = 10 // salt 길이
 // 비밀번호 저장 전 암호화
-userSchema.pre('save', function(next) {
-  console.log("userSchema.pre('save', function(next) {})")
-  let user = this // 사용자가 입력한 정보
-  if(user.isModified('password')) { // 비밀번호 변경시에만 작동
-    console.log("user.isModified('password')")
+userSchema.pre('save', function (next) {
+  console.log("User.js userSchema.pre('save', function(next) {})")
+  let enteredUser = this // 사용자가 입력한 정보
+  if (enteredUser.isModified('password')) { // 비밀번호 변경시에만 작동
+    console.log("User.js enteredUser.isModified('password')")
+    console.log("User.js bcrypt.genSalt(saltRounds, (err, salt) => {})")
     bcrypt.genSalt(saltRounds, (err, salt) => { // salt 생성
-      console.log("bcrypt.genSalt(saltRounds, (err, salt) => {})")
-      if(err) return next(err)
-      bcrypt.hash(user.password, salt, (err, hash) => { // hash 생성
-        console.log("bcrypt.hash(user.password, salt, (err, hash) => {})")
+      if (err) return next(err)
+      console.log("User.js bcrypt.hash(enteredUser.password, salt, (err, hash) => {})")
+      bcrypt.hash(enteredUser.password, salt, (err, hash) => { // hash 생성
         // Store hash in your password DB
-        if(err) return next(err)
-        user.password = hash
-        console.log("next()")
+        if (err) return next(err)
+        enteredUser.password = hash
         next()
       })
     })
   } else {
-    console.log("else")
-    console.log("next()")
+    console.log("User.js else")
     next()
   }
 })
@@ -318,24 +322,27 @@ userSchema.pre('save', function(next) {
 ```js
 // index.js
 // 로그인 기능(/api/user/login)
+// findOne(enteredUser) -> foundUser
+// generateToken(foundUser) -> tokenReceivedUser
 app.post('/api/user/login', (req, res) => {
-  console.log("\napp.post('/api/user/login', (req, res) => {})")
-  const user = new User(req.body)// 사용자가 입력한 정보 user를 저장
+  console.log("index.js app.post('/api/user/login', (req, res) => {})")
+  const enteredUser = new User(req.body)// 사용자가 입력한 정보 user를 저장
   // 요청된 이메일을 데이터베이스(User)에 있는지 찾는다
-  User.findOne({email : user.email}, (err, userInfo) => {
-    console.log("User.findOne({email : user.email}, (err, userInfo) => {})")
+  console.log("index.js User.findOne({email : enteredUser.email}, (err, foundUser) => {})")
+  User.findOne({ email: enteredUser.email }, (err, foundUser) => {
     // user : 사용자가 입력한 정보, userInfo : 이메일로 찾아온 정보
-    if(err) return res.json({loginSucces : false, err})
-    if(!userInfo) return res.json({loginSucces : false, message : '입력한 이메일에 해당하는 계정이 없습니다.'})
+    if (err) return res.json({ loginSuccess: false, err })
+    if (!foundUser) return res.json({ loginSuccess: false, message: "입력한 이메일에 해당하는 계정이 없습니다." })
     // 요청된 이메일이 데이터베이스에 있다면, 비밀번호가 맞는 비밀번호 인지 확인, comparePassword 생성 필요
-    userInfo.comparePassword(user.password, (err, isMatch) => {
-      console.log("userInfo.comparePassword(user.password, (err, isMatch) => {}")
-    // user.comparePassword2(userInfo.password, (err, isMatch) => {
-    //   console.log("user.comparePassword2(userInfo.password, (err, isMatch) => {}")
-      if(err) return res.json({loginSucces : false, err})
-      if(!isMatch) return res.json({loginSucces : false, message : '비밀번호가 틀렸습니다.'})
+    console.log("index.js foundUser.comparePassword(enteredUser.password, (err, isMatch) => {}")
+    foundUser.comparePassword(enteredUser.password, (err, isMatch) => {
+      // enteredUser.comparePassword2(foundUser.password, (err, isMatch) => {
+      //   console.log("index.js enteredUser.comparePassword2(foundUser.password, (err, isMatch) => {}")
+      if (err) return res.json({ loginSuccess: false, err })
+      if (!isMatch) return res.json({ loginSuccess: false, message: "비밀번호가 틀렸습니다." })
       // 비밀번호까지 맞다면 토큰을 생성하기, generateToken 생성 필요
-      userInfo.generateToken((err, userInfo) => {
+      console.log("index.js foundUser.generateToken((err, tokenReceivedUser) => {}")
+      foundUser.generateToken((err, tokenReceivedUser) => {
         // 토큰 생성 후 클라이언트에 저장
       })
     })
@@ -345,24 +352,24 @@ app.post('/api/user/login', (req, res) => {
 // User.js
 // 비밀번호 비교 메소드
 // 이메일로 검색된 정보로 해당 메소드 실행
-userSchema.methods.comparePassword = function(plainPassword, callback) {
-  console.log("userSchema.methods.comparePassword = function(plainPassword, callback) {})")
+userSchema.methods.comparePassword = function (plainPassword, callback) {
+  console.log("User.js userSchema.methods.comparePassword = function(plainPassword, callback) {})")
   // plainPassword : 사용자가 입력한 정보, this.password : 이메일로 찾아온 정보(비밀번호)
+  console.log("User.js bcrypt.compare(plainPassword, this.password, (err, isMatch) => {})")
   bcrypt.compare(plainPassword, this.password, (err, isMatch) => {
-    console.log("bcrypt.compare(plainPassword, this.password, (err, isMatch) => {})")
-    if(err) return callback(err) 
+    if (err) return callback(err)
     return callback(null, isMatch)
   })
 }
 
 // 비밀번호 비교 메소드2 
 // 사용자가 입력한 정보로 해당메소드 실행(가능하긴 하지만 사용은 고려해볼 것)
-userSchema.methods.comparePassword2 = function(encodePassword, callback) {
-  console.log("userSchema.methods.comparePassword2 = function(encodePassword, callback) {})")
+userSchema.methods.comparePassword2 = function (encodePassword, callback) {
+  console.log("User.js userSchema.methods.comparePassword2 = function(encodePassword, callback) {})")
   // this.password : 사용자가 입력한 정보, encodePassword : 이메일로 찾아온 정보(비밀번호)
+  console.log("User.js bcrypt.compare(this.password, encodePassword, (err, isMatch) => {})")
   bcrypt.compare(this.password, encodePassword, (err, isMatch) => {
-    console.log("bcrypt.compare(this.password, encodePassword, (err, isMatch) => {})")
-    if(err) return callback(err) 
+    if (err) return callback(err)
     return callback(null, isMatch)
   })
 }
@@ -383,32 +390,31 @@ npm install cookie-parser --save
 - 쿠키에 토큰 저장
 ```js
 // User.js
-var jwt = require('jsonwebtoken')
+const jwt = require('jsonwebtoken')
 // ... 토큰 생성 
-userSchema.methods.generateToken = function(callback) {
+userSchema.methods.generateToken = function (callback) {
   console.log("User.js userSchema.methods.generateToken = function(callback) {})")
-  var user = this // 여기서 this는 이메일을 통해 DB에서 얻어온 정보(userInfo)
+  var enteredUser = this // 여기서 this는 이메일을 통해 DB에서 얻어온 정보(userInfo)
   // user._id + 'screetToken' => token
   // token + 'screetToken' => user._id
-  // jsonwebtoken을 이용해서 토큰 생성
-  var token = jwt.sign(user._id.toHexString(), config.tokenKey)
-  user.token = token
-  user.save((err, userInfo) => {
-    console.log("User.js user.save((err, userInfo) => {})")
-    if(err) return callback(err) 
-    return callback(null, userInfo)
+  // jsonwebtoken.sign을 이용해서 토큰 생성
+  var token = jwt.sign(enteredUser._id.toHexString(), config.tokenKey)
+  enteredUser.token = token
+  console.log("User.js enteredUser.save((err, savedUser) => {})")
+  enteredUser.save((err, savedUser) => {
+    if (err) return callback(err)
+    return callback(null, savedUser)
   })
 }
 
 // index.js
 const cookieParse = require('cookie-parser')
-// ...
-userInfo.generateToken((err, userInfo) => {
-  console.log("index.js userInfo.generateToken((err, user) => {}")
+// ... app.post('/api/user/login', (req, res) => {})
+foundUser.generateToken((err, tokenReceivedUser) => {
   // 토큰 생성에서 오류가 발생하는 경우 서버의 문제임으로 400 error를 내보냄
-  if(err) return res.status(400).send(err)
+  if (err) return res.status(400).send(err)
   // 생성한 토큰을 쿠키에 저장, 다른 저장 방법에 대해서는 추후 진행
-  return res.status(200).cookie("x_auth", userInfo.token).json({loginSucces : true})
+  return res.status(200).cookie("x_auth", tokenReceivedUser.token).json({ loginSuccess: true })
 })
 ```
 
@@ -418,16 +424,16 @@ userInfo.generateToken((err, userInfo) => {
 - express의 middleware를 이용
 ```js
 // index.js
-const {auth} = require('./middleware/auth') 
+const { auth } = require('./middleware/auth')
 // 권한 인증(/api/user/auth)
 app.get('/api/user/auth', auth, (req, res) => {
   console.log("index.js app.get('/api/user/auth', auth, (req, res) => {})")
-  return res.status(200).json({isAuth : true, authedUser : req.authedUser})
+  return res.status(200).json({ isAuth: true, authedUser: req.authedUser })
 })
 
 // User.js
 // 토큰으로 권한 확인
-userSchema.statics.findByToken = function(token, callback) {
+userSchema.statics.findByToken = function (token, callback) {
   console.log("User.js userSchema.statics.findByToken = function(token, callback) {})")
   // jsonwebtoken.verify를 이용해서 받아온 토큰을 디코드 -> 결과는 err, decoded(user._id)
   console.log("User.js jwt.verify(token, config.tokenKey, (err, decoded) => {})")
@@ -435,15 +441,16 @@ userSchema.statics.findByToken = function(token, callback) {
     // 쿠키의 토큰과 사용자의 decoded(user._id)로 DB 저장된 값이 있는지 확인
     // 디코드하지 않고 토큰만으로 검색해도 되지만 사용 가능성을 넓힐 수 있을듯
     console.log("User.js User.findOne({_id : decoded, token : token}, (err, foundUser) => {})")
-    User.findOne({_id : decoded, token : token}, (err, foundUser) => {
-      if(err) return callback(err)
+    User.findOne({ _id: decoded, token: token }, (err, foundUser) => {
+      if (err) return callback(err)
       return callback(null, foundUser)
     })
   })
 }
 
 // middleware/auth.js
-const {User} = require('../models/User') 
+const { User } = require('../models/User')
+
 // 인증 처리 미들웨어
 // findByToken(req.cookies.x_auth) -> foundUser = authedUser
 let auth = (req, res, next) => {
@@ -460,15 +467,15 @@ let auth = (req, res, next) => {
   // })
   // 토큰 그대로 사용
   console.log("auth.js User.findOne({token : token}, (err, foundUser) => {})")
-  User.findOne({token : token}, (err, foundUser) => {
-    if(err) throw err
-    if(!foundUser) return res.json({isAuth : false, message : '인증된 사용자가 아닙니다.'})
+  User.findOne({ token: token }, (err, foundUser) => {
+    if (err) throw err
+    if (!foundUser) return res.json({ isAuth: false, message: '인증된 사용자가 아닙니다.' })
     req.authedUser = foundUser
     next()
   })
 }
 
-module.exports = {auth}
+module.exports = { auth }
 ```
 
 ## 14장 로그아웃 기능
@@ -479,9 +486,9 @@ module.exports = {auth}
 app.get('/api/user/logout', auth, (req, res) => {
   console.log("index.js app.get('/api/user/logout', auth, (req, res) => {})")
   console.log("index.js User.findOneAndUpdate({_id : req.authedUser._id}, {token : ''}, (err, udatedUser) => {})")
-  User.findOneAndUpdate({_id : req.authedUser._id}, {token : ''}, (err, udatedUser) => {
-    if(err) return res.status(400).send(err)
-    return res.status(200).clearCookie('x_auth').json({logoutSuccess : true})
+  User.findOneAndUpdate({ _id: req.authedUser._id }, { token: '' }, (err, udatedUser) => {
+    if (err) return res.status(400).send(err)
+    return res.status(200).clearCookie('x_auth').json({ logoutSuccess: true })
   })
 })
 ```
