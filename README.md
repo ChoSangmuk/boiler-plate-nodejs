@@ -19,8 +19,8 @@ docker commit -m "node, npm installed" heuristic_panini node_basic:0.1
 docker run -p 3000:3000 -p 5000:5000 -v /Users/chosangmuk/Documents:/workspace -it node_basic:0.1
 ```
    
-## 실행 방법
-1. MongoDB atlas 가입 및 클러스터 설정 -> [3장 몽고 DB 연결 참고](#-3장-몽고-DB-연결)
+## 실행 방법 (로컬)
+1. MongoDB atlas 가입 및 클러스터 설정, [참고](#3장-몽고-db-연결)
 2. config/dev.js 생성 및 mongoDB 정보입력
 ```js
 // config/dev.js
@@ -29,15 +29,16 @@ module.exports = {
   tokenKey : ''
 }
 ```
-3. root directory에서 종속성 다운로드
+3. Node.js Back-End 실행
 ```sh
 # Shell
+# root directory에서 종속성 다운로드
 npm install
-```
-4. Node.js Back-End 실행
-```sh
-# Shell
+
+# Node.js 실행
 npm run start
+# or
+npm run dev
 ```
 
 ## 1장 소개

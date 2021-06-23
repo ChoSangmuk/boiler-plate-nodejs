@@ -1,4 +1,4 @@
-const {User} = require('../models/User') 
+const { User } = require('../models/User')
 
 // 인증 처리 미들웨어
 // findByToken(req.cookies.x_auth) -> foundUser = authedUser
@@ -16,12 +16,12 @@ let auth = (req, res, next) => {
   // })
   // 토큰 그대로 사용
   console.log("auth.js User.findOne({token : token}, (err, foundUser) => {})")
-  User.findOne({token : token}, (err, foundUser) => {
-    if(err) throw err
-    if(!foundUser) return res.json({isAuth : false, message : '인증된 사용자가 아닙니다.'})
+  User.findOne({ token: token }, (err, foundUser) => {
+    if (err) throw err
+    if (!foundUser) return res.json({ isAuth: false, message: '인증된 사용자가 아닙니다.' })
     req.authedUser = foundUser
     next()
   })
 }
 
-module.exports = {auth}
+module.exports = { auth }
