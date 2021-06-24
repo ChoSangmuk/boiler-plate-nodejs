@@ -3,7 +3,7 @@ const cookieParse = require('cookie-parser')
 const express = require('express')
 const mongoose = require('mongoose')
 const app = express()
-const port = 5000
+const port = process.env.PORT || 5000
 
 // 설정정보 가져오기
 const config = require('./config/key')
